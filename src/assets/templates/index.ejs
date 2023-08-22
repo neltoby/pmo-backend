@@ -1,0 +1,17 @@
+<%- include('./partials/header.ejs') %>
+
+<div
+  style="margin: 0 auto; max-width: 720px; font-family: Arial"
+>
+  <h3>Admin Verification Process</h3>
+  <p>Hey there!</p>
+  <div>
+    This is to notify of a request to be included as a super admin by <b><%= username %></b>.
+    if you do not wish to include <%= username %> as a super admin, please ignore this mail.
+    Else click the <a href='<%= url %>/superadmin/verification?token=<%= token %>'>link</a> to include
+    <b style="color: lightblue"><%= username %></b>.
+    <p>Thank you!</p>
+  </div>
+   
+</div>
+
