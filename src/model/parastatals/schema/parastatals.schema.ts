@@ -1,6 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Schema as MongooseSchema } from 'mongoose';
-import { SchemaDepartmentType } from '@interfaces/interfaces';
 
 import { Department } from './department.schema';
 

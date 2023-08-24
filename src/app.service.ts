@@ -2,6 +2,7 @@ import {
   HttpException,
   HttpStatus,
   Injectable,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import {
@@ -20,6 +21,7 @@ import {
   SignUpReturnType,
   SigninType,
   SignupUserDatatype,
+  UserDetails,
 } from './interfaces/interfaces';
 import { AssignedRole } from '@model/assigned-role/schema/assigned-roles.schema.js';
 import { User } from '@model/user/schema/user.schema.js';
@@ -69,6 +71,24 @@ export class AppService {
   async isAssignerEmailExist(email: string): Promise<boolean> {
     const res = await this.isEmailExistInRole(email);
     return res ? true : false;
+  }
+
+  async getUser(id: Schema.Types.ObjectId): Promise<UserDetails> {
+    let user;
+    try {
+      user = (await this.usermodelService.findOne({ _id: id })) as any;
+    } catch (e) {
+      this.logger.error(e.message);
+      throw new HttpException(
+        {
+          status: HttpStatus.INTERNAL_SERVER_ERROR,
+          error: APP_ERROR,
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+    const doc = user._doc as UserDetails;
+    return { ...doc };
   }
 
   async signupUser(data: SignupUserDatatype): Promise<SignUpReturnType> {
@@ -135,7 +155,8 @@ export class AppService {
     const { email, password } = data;
     const isEmail = await this.emailExistService(email);
     if (isEmail.status) {
-      const user = isEmail.data;
+      const user = (isEmail.data as any)._doc;
+      console.log(user);
       try {
         await this.hashService.verifyHash(password, user.password);
       } catch (e) {
@@ -148,10 +169,22 @@ export class AppService {
           HttpStatus.NOT_FOUND,
         );
       }
-      const token = await this.jwtService.signJwt({
-        sub: user._id,
-        type: 'signin',
-      });
+      let token;
+      try {
+        token = await this.jwtService.signJwt({
+          sub: user._id,
+          type: 'signin',
+        });
+      } catch (e) {
+        this.logger.error(e.message);
+        throw new HttpException(
+          {
+            status: HttpStatus.INTERNAL_SERVER_ERROR,
+            error: APP_ERROR,
+          },
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
       delete user.password;
       return {
         ...user,
@@ -159,6 +192,13 @@ export class AppService {
         role: user.role.role,
       };
     }
+    throw new HttpException(
+      {
+        status: HttpStatus.NOT_FOUND,
+        error: 'User not found.',
+      },
+      HttpStatus.NOT_FOUND,
+    );
   }
 
   async forgotPassword(email): Promise<ForgotPasswordReturnType> {

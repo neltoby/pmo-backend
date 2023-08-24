@@ -19,7 +19,8 @@ export class ParastatalsService {
   async getAllParastatals() {
     let res;
     try {
-      res = this.parastatalsModelService.findAll({ select: 'name' });
+      res = await this.parastatalsModelService.findAll({ select: 'name' });
+      console.log(res, 'line 23');
     } catch (e) {
       this.logger.error(e.message);
       throw new HttpException(
@@ -27,13 +28,15 @@ export class ParastatalsService {
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
-    return { data: res.toObject() };
+    return { data: res };
   }
 
   async getParastatals(_id: Types.ObjectId) {
     let res;
     try {
-      res = this.parastatalsModelService.findById(_id, { select: 'name' });
+      res = await this.parastatalsModelService.findById(_id, {
+        select: 'name',
+      });
     } catch (e) {
       this.logger.error(e.message);
       throw new HttpException(
@@ -41,13 +44,13 @@ export class ParastatalsService {
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
-    return { ...res.toObject() };
+    return { ...res._doc };
   }
 
   async addParastatals(data: ParastatalsType) {
     let res;
     try {
-      res = this.parastatalsModelService.create({ name: data.name });
+      res = await this.parastatalsModelService.create({ name: data.name });
     } catch (e) {
       this.logger.error(e.message);
       throw new HttpException(
@@ -55,13 +58,13 @@ export class ParastatalsService {
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
-    return { ...res.toObject() };
+    return { ...res._doc };
   }
 
   async getAllDepartment(pid: Types.ObjectId) {
     let res;
     try {
-      res = this.parastatalsModelService.findOne({ _id: pid });
+      res = await this.parastatalsModelService.findOne({ _id: pid });
     } catch (e) {
       this.logger.error(e.message);
       throw new HttpException(
@@ -69,14 +72,14 @@ export class ParastatalsService {
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
-    return { data: res.toObject() };
+    return { data: res._doc };
     return {};
   }
 
   async getDepartment({ pid, did }: GetDepartmentType) {
     let res;
     try {
-      res = this.parastatalsModelService.findOne(
+      res = await this.parastatalsModelService.findOne(
         { _id: pid, 'department._id': did },
         { select: 'name department.name' },
       );
@@ -87,13 +90,13 @@ export class ParastatalsService {
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
-    return { ...res.toObject() };
+    return { ...res._doc };
   }
 
   async addDepartment({ name, pid }: AddDepartmentType) {
     let res;
     try {
-      res = this.parastatalsModelService.findOneAndUpdate(
+      res = await this.parastatalsModelService.findOneAndUpdate(
         { _id: pid },
         { $push: { department: { name } } },
       );
@@ -104,6 +107,6 @@ export class ParastatalsService {
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
-    return { ...res.toObject() };
+    return { ...res._doc };
   }
 }

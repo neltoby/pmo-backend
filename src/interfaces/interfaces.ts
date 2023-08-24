@@ -164,6 +164,17 @@ export type SchemaDepartmentType = {
   date: Date;
 };
 
+export type UserDetails = {
+  _id: string;
+  firstname: string;
+  lastname: string;
+  email: string;
+  role: Role;
+  parastatals: Schema.Types.ObjectId;
+  department: SchemaDepartmentType;
+  date: Date;
+};
+
 export type AddDepartmentType = DepartmentType & {
   pid: Schema.Types.ObjectId;
 };

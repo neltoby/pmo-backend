@@ -22,13 +22,13 @@ import { Roles } from 'src/auth/roles.decorator';
 export class ParastatalsController {
   constructor(private readonly parastatalsService: ParastatalsService) {}
 
-  @UseGuards(AuthGuard)
+  // @UseGuards(AuthGuard)
   @Get()
   getAllParastatals() {
     return this.parastatalsService.getAllParastatals();
   }
 
-  @UseGuards(AuthGuard)
+  // @UseGuards(AuthGuard)
   @Get(':pid')
   getParastatal(@Param('pid') pid: Types.ObjectId) {
     return this.parastatalsService.getParastatals(pid);

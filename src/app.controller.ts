@@ -19,6 +19,7 @@ import {
   Role,
   SignUpReturnType,
   TokenPayloadInterface,
+  UserDetails,
 } from '@interfaces/interfaces';
 import { AuthGuard } from './auth/auth.guard';
 import { Roles } from './auth/roles.decorator';
@@ -37,6 +38,12 @@ import { InviteUser } from '@model/invite-user/schema/inviteuser.schema';
 @Controller('users')
 export class AppController {
   constructor(private readonly appService: AppService) {}
+
+  @UseGuards(AuthGuard)
+  @Get()
+  getUser(@Request() req): Promise<UserDetails> {
+    return this.appService.getUser((req as TokenPayloadInterface).sub);
+  }
 
   @UseGuards(AuthGuard)
   @Roles(
