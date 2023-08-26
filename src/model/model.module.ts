@@ -7,6 +7,7 @@ import { InviteUserModelModule } from './invite-user/inviteuser.model.module';
 import { ForgotPasswordModelModule } from './forgot-password/forgot-password.model.module';
 import { ParastatalsModelModule } from './parastatals/parastatals.model.module';
 import { SenderModelModule } from './sender/sender.model.module';
+import { ProjectsModelModule } from './projects/projects.model.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { SenderModelModule } from './sender/sender.model.module';
     ForgotPasswordModelModule,
     ParastatalsModelModule,
     SenderModelModule,
+    ProjectsModelModule,
   ],
   exports: [
     UserModelModule,
@@ -26,6 +28,7 @@ import { SenderModelModule } from './sender/sender.model.module';
     ForgotPasswordModelModule,
     ParastatalsModelModule,
     SenderModelModule,
+    ProjectsModelModule,
   ],
 })
 export class ModelModule {}

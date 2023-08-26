@@ -68,6 +68,30 @@ export type AssignRoleReturnType = {
   id: Schema.Types.ObjectId;
 };
 
+export enum BankAcctStatus {
+  Active = 'active',
+  Closed = 'closed',
+}
+
+export type DetailsOfProjects = {
+  user: Schema.Types.ObjectId;
+  name_of_bank: string;
+  account_no: string;
+  purpose_of_acct: string;
+  balance_for_the_day: number;
+  cashbook_balance: number;
+  status_of_bank_account: BankAcctStatus;
+};
+
+export type CreateProjects = {
+  department: Schema.Types.ObjectId;
+  details: DetailsOfProjects;
+};
+
+export type CreateProjectsRetuenType = CreateProjects & {
+  _id: Schema.Types.ObjectId;
+};
+
 export type CreateRoles = {
   adminassigner?: Schema.Types.ObjectId;
   superadminassigner?: Schema.Types.ObjectId;
@@ -84,6 +108,11 @@ export type ForgotPasswordTokenType = {
 export type InviteTokenPayloadType = {
   invite_id: Schema.Types.ObjectId;
   type: 'invite';
+};
+
+export type FindAllDepartmentType = {
+  start_date?: Date;
+  end_date?: Date;
 };
 
 export interface TokenPayloadInterface {

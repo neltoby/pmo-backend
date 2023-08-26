@@ -14,6 +14,7 @@ import { NotificationQueueModule } from './notification-queue/notification-queue
 import { MongooseModule } from '@nestjs/mongoose';
 import { BullModule } from '@nestjs/bull';
 import { ParastatalsModule } from './parastatals/parastatals.module';
+import { ProjectsModule } from './projects/projects.module';
 
 @Module({
   imports: [
@@ -57,6 +58,7 @@ import { ParastatalsModule } from './parastatals/parastatals.module';
     HashModule,
     NotificationQueueModule,
     ParastatalsModule,
+    ProjectsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
