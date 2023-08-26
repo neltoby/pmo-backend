@@ -20,8 +20,7 @@ export class ProjectsDetails {
   name_of_bank: string;
 
   @Prop({ type: String, required: true })
-  account_no;
-  string;
+  account_no: string;
 
   @Prop({ type: String, required: true })
   purpose_of_acct: string;
