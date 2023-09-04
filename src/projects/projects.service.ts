@@ -74,9 +74,7 @@ export class ProjectsService {
         const proj = projects;
         return { ...proj };
       }
-      this.logger.error(
-        `Invalid project object. Projects can not be empty.::: ${e.message}`,
-      );
+      this.logger.error(`Invalid project object. Projects can not be empty.`);
       throw new HttpException(
         {
           status: HttpStatus.BAD_REQUEST,

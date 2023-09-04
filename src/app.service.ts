@@ -76,6 +76,7 @@ export class AppService {
   async getUser(id: Schema.Types.ObjectId): Promise<UserDetails> {
     let user;
     try {
+      console.log(id, 'line 79');
       user = (await this.usermodelService.findOne({ _id: id })) as any;
     } catch (e) {
       this.logger.error(e.message);
@@ -87,8 +88,9 @@ export class AppService {
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
-    const doc = user._doc as UserDetails;
-    return { ...doc };
+    // const doc = user._doc as UserDetails;
+    console.log(user, 'line 92');
+    return { ...user };
   }
 
   async signupUser(data: SignupUserDatatype): Promise<SignUpReturnType> {

@@ -42,7 +42,8 @@ export class AppController {
   @UseGuards(AuthGuard)
   @Get()
   getUser(@Request() req): Promise<UserDetails> {
-    return this.appService.getUser((req as TokenPayloadInterface).sub);
+    console.log(req.user, 'line 45');
+    return this.appService.getUser((req.user as TokenPayloadInterface).sub);
   }
 
   @UseGuards(AuthGuard)

@@ -2,12 +2,20 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Schema as MongooseSchema } from 'mongoose';
 
 import { Department } from './department.schema';
+import { ParastatalsCategory } from '@model/parastatals-category/schema/parastatals-category.schema';
 
 export type ParastatalsDocument = HydratedDocument<Parastatals>;
 
-@Schema()
+@Schema({ timestamps: true })
 export class Parastatals {
   _id: MongooseSchema.Types.ObjectId;
+
+  @Prop({
+    type: MongooseSchema.Types.ObjectId,
+    required: true,
+    ref: 'ParastatalsCategory',
+  })
+  category: ParastatalsCategory;
 
   @Prop({ type: String, required: true, unique: true, index: true })
   name: string;
@@ -15,8 +23,11 @@ export class Parastatals {
   @Prop()
   department: Department[];
 
-  @Prop({ type: Date, default: new Date() })
-  date: Date;
+  @Prop()
+  createdAt?: Date;
+
+  @Prop()
+  updatedAt?: Date;
 }
 
 export const ParastatalsSchema = SchemaFactory.createForClass(Parastatals);

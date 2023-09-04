@@ -10,13 +10,14 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ParastatalsService } from './parastatals.service';
-import { Types } from 'mongoose';
+import { Schema } from 'mongoose';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { AddParastatalsDto } from 'src/dto/addParastatals';
 import { AddDepartmentDto } from 'src/dto/addDepartment';
 import { GetDepartmentType, Role } from '@interfaces/interfaces';
 import { RolesGuard } from 'src/auth/roles.guard';
 import { Roles } from 'src/auth/roles.decorator';
+import { ApiParam } from '@nestjs/swagger';
 
 @Controller('parastatals')
 export class ParastatalsController {
@@ -29,8 +30,15 @@ export class ParastatalsController {
   }
 
   // @UseGuards(AuthGuard)
-  @Get(':pid')
-  getParastatal(@Param('pid') pid: Types.ObjectId) {
+  @Get('/:pid')
+  @ApiParam({
+    name: 'parastatalId',
+    required: true,
+    description: 'A mongodb schema type objectId',
+    schema: { type: 'string' },
+  })
+  getParastatal(@Param('pid') pid: Schema.Types.ObjectId) {
+    console.log(pid);
     return this.parastatalsService.getParastatals(pid);
   }
 
@@ -43,7 +51,7 @@ export class ParastatalsController {
   }
 
   @Get(':pid/department')
-  getAllDepartment(@Param('pid') pid: Types.ObjectId) {
+  getAllDepartment(@Param('pid') pid: Schema.Types.ObjectId) {
     return this.parastatalsService.getAllDepartment(pid);
   }
 
@@ -52,8 +60,9 @@ export class ParastatalsController {
     return this.parastatalsService.getDepartment(ids);
   }
 
-  @Post()
+  @Post('department')
   addDepartment(@Body() data: AddDepartmentDto) {
+    console.log(data, 'line 65');
     return this.parastatalsService.addDepartment(data);
   }
 }

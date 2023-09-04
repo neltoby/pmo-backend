@@ -8,6 +8,7 @@ import { ForgotPasswordModelModule } from './forgot-password/forgot-password.mod
 import { ParastatalsModelModule } from './parastatals/parastatals.model.module';
 import { SenderModelModule } from './sender/sender.model.module';
 import { ProjectsModelModule } from './projects/projects.model.module';
+import { ParastatalsCategoryModelModule } from './parastatals-category/parastatals-category.model.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { ProjectsModelModule } from './projects/projects.model.module';
     InviteUserModelModule,
     ForgotPasswordModelModule,
     ParastatalsModelModule,
+    ParastatalsCategoryModelModule,
     SenderModelModule,
     ProjectsModelModule,
   ],
@@ -27,6 +29,7 @@ import { ProjectsModelModule } from './projects/projects.model.module';
     InviteUserModelModule,
     ForgotPasswordModelModule,
     ParastatalsModelModule,
+    ParastatalsCategoryModelModule,
     SenderModelModule,
     ProjectsModelModule,
   ],

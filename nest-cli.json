@@ -5,6 +5,15 @@
   "compilerOptions": {
     "deleteOutDir": true,
     "assets": ["assets/**/*.ejs"],
-    "watchAssets": true
+    "watchAssets": true,
+    "plugins": [
+      {
+        "name": "@nestjs/swagger/plugin",
+        "options": {
+          "dtoFileNameSuffix": [".dto.ts"],
+          "controllerFileNameSuffix": [".controller.ts"]
+        }
+      }
+    ]
   }
 }

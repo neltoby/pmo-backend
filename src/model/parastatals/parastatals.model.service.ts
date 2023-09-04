@@ -1,21 +1,25 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
+import { Model, Schema, Types } from 'mongoose';
 
-// import { ParastatalsDataType } from '@interfaces/interfaces';
-import { Parastatals, ParastatalsDocument } from './schema/parastatals.schema';
-import { ParastatalsDataType } from '@interfaces/interfaces';
+import { Parastatals } from './schema/parastatals.schema';
 import {
-  parastatalsListBeginningWithLagos,
-  parastatalsListWithoutLagos,
-} from './seeds';
+  Name,
+  ParastatalsCategoryDataType,
+  ParastatalsDataType,
+  ParastatalsSeed,
+  ParastatalsSeedAdjusted,
+} from '@interfaces/interfaces';
+import { parastatalsWithThemes } from './seeds';
 import { MyLoggerService } from '@mylogger/mylogger.service';
+import { ParastatalsCategoryModelService } from '@model/parastatals-category/parastatals-category.model.service';
 
 @Injectable()
 export class ParastatalsModelService implements OnModuleInit {
   constructor(
     @InjectModel(Parastatals.name)
     private parastatalsModel: Model<Parastatals>,
+    private parastatalsCategoryModelService: ParastatalsCategoryModelService,
     private logger: MyLoggerService,
   ) {}
 
@@ -55,8 +59,8 @@ export class ParastatalsModelService implements OnModuleInit {
     return await query.exec();
   }
 
-  async create(invite: ParastatalsDataType): Promise<Parastatals> {
-    const createdRole = new this.parastatalsModel(invite);
+  async create(parastatal: ParastatalsDataType): Promise<Parastatals> {
+    const createdRole = new this.parastatalsModel(parastatal);
     return await createdRole.save();
   }
 
@@ -71,18 +75,68 @@ export class ParastatalsModelService implements OnModuleInit {
     return await this.parastatalsModel.findOneAndDelete(condition);
   }
 
+  async insertMany(list: ParastatalsCategoryDataType[]) {
+    return await this.parastatalsModel.insertMany(list);
+  }
+
+  rawModel() {
+    return this.parastatalsModel;
+  }
+
   async onModuleInit() {
     try {
       const res = await this.parastatalsModel.find({});
       if (!(res.length > 0)) {
-        const withLagos: Array<string> = parastatalsListBeginningWithLagos.map(
-          (item) => `Lagos State ${item}`,
+        const allParastatalsList = parastatalsWithThemes.map(
+          (item: ParastatalsSeed): ParastatalsSeedAdjusted => {
+            const newItem: ParastatalsSeedAdjusted = {
+              data: [],
+              theme: { name: '' },
+            };
+            newItem.theme = { name: item.theme };
+            newItem.data = item.data.map((name) => ({ name }));
+            if (item.departments) {
+              newItem.departments = item.departments.map((name) => ({
+                name,
+              }));
+            }
+            return newItem;
+          },
         );
-        const allParastatalsList: Array<{ name: string }> = [
-          ...withLagos,
-          ...parastatalsListWithoutLagos,
-        ].map((item) => ({ name: item }));
-        this.parastatalsModel.insertMany(allParastatalsList);
+        const insert = await Promise.all(
+          allParastatalsList.map(async (item) => {
+            const themes = await this.parastatalsCategoryModelService.create(
+              item.theme,
+            );
+            console.log(themes._id);
+            const addedId = item.data.map((parastatal) => ({
+              category: themes._id as Schema.Types.ObjectId,
+              ...parastatal,
+            }));
+            let themesData;
+            if (addedId.length > 1) {
+              themesData = await this.insertMany(addedId);
+            } else {
+              themesData = await this.create(addedId[0]);
+            }
+            let deptAdded;
+            if (item.departments) {
+              deptAdded = await this.findOneAndUpdate(
+                { _id: themesData._id },
+                {
+                  $set: { department: item.departments },
+                },
+              );
+              return {
+                data: themesData,
+                departments: deptAdded,
+                theme: themes,
+              };
+            }
+            return { data: themesData, theme: themes };
+          }),
+        );
+        console.log(insert);
       }
     } catch (e) {
       this.logger.error(e.message);

@@ -6,9 +6,10 @@ import { ParastatalsModelModule } from '@model/parastatals/parastatals.model.mod
 import { AuthGuard } from 'src/auth/auth.guard';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
+import { ParastatalsCategoryModelModule } from '@model/parastatals-category/parastatals-category.model.module';
 
 @Module({
-  imports: [ParastatalsModelModule],
+  imports: [ParastatalsModelModule, ParastatalsCategoryModelModule],
   controllers: [ParastatalsController],
   providers: [ParastatalsService, AuthGuard, JwtService, ConfigService],
 })

@@ -20,12 +20,12 @@ import {
 } from '@interfaces/interfaces';
 import { AuthGuard } from 'src/auth/auth.guard';
 
-@Controller('projects/department')
+@Controller('projects')
 export class ProjectsController {
   constructor(private readonly projectsService: ProjectsService) {}
 
   @UseGuards(AuthGuard)
-  @Post()
+  @Post('department')
   create(
     @Body() createProjectDto: CreateProjectDto,
     @Request() req,
@@ -44,7 +44,7 @@ export class ProjectsController {
   }
 
   @UseGuards(AuthGuard)
-  @Get(':departmentId')
+  @Get('department/:departmentId')
   findByDepratment(
     @Param('departmentId') id: string,
     @Query() query: FindAllDepartmentType,
@@ -52,18 +52,18 @@ export class ProjectsController {
     return this.projectsService.findByDepartment(id, query);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.projectsService.findOne(+id);
-  }
+  // @Get(':id')
+  // findOne(@Param('id') id: string) {
+  //   return this.projectsService.findOne(+id);
+  // }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateProjectDto: UpdateProjectDto) {
-    return this.projectsService.update(+id, updateProjectDto);
-  }
+  // @Patch(':id')
+  // update(@Param('id') id: string, @Body() updateProjectDto: UpdateProjectDto) {
+  //   return this.projectsService.update(+id, updateProjectDto);
+  // }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.projectsService.remove(+id);
-  }
+  // @Delete(':id')
+  // remove(@Param('id') id: string) {
+  //   return this.projectsService.remove(+id);
+  // }
 }

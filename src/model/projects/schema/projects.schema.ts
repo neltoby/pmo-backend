@@ -17,7 +17,7 @@ export class Projects {
   })
   department: Department;
 
-  @Prop({ type: [ProjectsDetails] })
+  @Prop()
   details: ProjectsDetails[];
 
   @Prop({ type: Date, default: new Date() })

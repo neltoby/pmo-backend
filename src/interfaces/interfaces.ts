@@ -29,6 +29,26 @@ export enum InviteStatus {
   Fulfilled = 'fulfilled',
 }
 
+export type Name = {
+  name: string;
+};
+
+export type ParastatalsCategoryDataType = Name & {
+  category: Schema.Types.ObjectId;
+};
+
+export type ParastatalsSeed = {
+  theme: string;
+  data: string[];
+  departments?: string[];
+};
+
+export type ParastatalsSeedAdjusted = {
+  theme: Name;
+  data: Name[];
+  departments?: Name[];
+};
+
 export type Email = {
   email: string;
 };
@@ -210,6 +230,7 @@ export type AddDepartmentType = DepartmentType & {
 
 export type ParastatalsType = {
   name: string;
+  category: Schema.Types.ObjectId;
 };
 
 export type GetDepartmentType = {
