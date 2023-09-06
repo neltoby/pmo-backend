@@ -31,9 +31,7 @@ import { ProjectsModule } from './projects/projects.module';
         );
         console.log(`${config.get('jwtSecret')}`, 'line 33');
         return {
-          uri: `${config.get(
-            'mongoUrl',
-          )}?authSource=admin&directConnection=true`,
+          uri: `${config.get('mongoUrl')}`,
         };
       },
       inject: [ConfigService],
@@ -46,6 +44,7 @@ import { ProjectsModule } from './projects/projects.module';
           redis: {
             host: config.get('redisHost'),
             port: config.get('redisPort'),
+            password: config.get('redisPassword'),
           },
         };
       },

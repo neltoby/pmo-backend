@@ -10,6 +10,7 @@ export const validationSchema = (port: number) =>
     MONGO_URL: Joi.string(),
     REDIS_HOST: Joi.string(),
     REDIS_PORT: Joi.number().default(6379),
+    REDIS_PASSWORD: Joi.string(),
     MAILTRAP_HOST: Joi.string(),
     MAILTRAP_PORT: Joi.number().default(2525),
     MAILTRAP_AUTH_USER: Joi.string(),
