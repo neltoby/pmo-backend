@@ -16,4 +16,4 @@ COPY . .
 
 # RUN yarn add --force bcrypt
 
-CMD [ "yarn", "start:dev" ]
+CMD [ "yarn", "start" ]

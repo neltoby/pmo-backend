@@ -26,9 +26,7 @@ import { ProjectsModule } from './projects/projects.module';
     MongooseModule.forRootAsync({
       useFactory: (config: ConfigService) => {
         return {
-          uri: `${config.get(
-            'mongoUrl',
-          )}`,
+          uri: `${config.get('mongoUrl')}`,
         };
       },
       inject: [ConfigService],
@@ -41,6 +39,7 @@ import { ProjectsModule } from './projects/projects.module';
           redis: {
             host: config.get('redisHost'),
             port: config.get('redisPort'),
+            password: config.get('redisPassword'),
           },
         };
       },
