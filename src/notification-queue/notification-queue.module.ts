@@ -12,7 +12,9 @@ import { NotificationQueueService } from './notification-queue.service';
     }),
     EmailModule,
   ],
-  providers: [NotificationQueueService, NotificationQueueConsumerProcessor],
+  providers: [NotificationQueueService,
+     //NotificationQueueConsumerProcessor
+    ],
   exports: [NotificationQueueService, EmailModule],
 })
 export class NotificationQueueModule {}

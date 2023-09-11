@@ -95,36 +95,24 @@ export class AppService {
 
   async signupUser(data: SignupUserDatatype): Promise<SignUpReturnType> {
     try {
-      const { invite_id, email, password, firstname, lastname } = data;
-      const getInviteData = await this.inviteuserService.findOne({
-        _id: invite_id,
-      });
-      if (getInviteData.email === email) {
-        const hashPassword = await this.hashService.hashing(password);
-        const role = getInviteData.sender.admin
-          ? {
-              adminassigner: getInviteData.sender.admin,
-              role: getInviteData.role,
-            }
-          : {
-              superadminassigner: getInviteData.sender.superadmin,
-              role: getInviteData.role,
-            };
+      const { email, password, firstname, middlename, lastname, isHod, parastatals} = data;
+      const hashPassword = await this.hashService.hashing(password);
+
         if (!(await this.isEmailExist(email))) {
+
+          //Get parastatals from db
           const user = await this.usermodelService.create({
             email,
             firstname,
+            middlename,
             lastname,
             password: hashPassword,
-            role,
+            isHod,
+            parastatals
           });
-          const userDetail = user;
-          const token = await this.jwtService.signJwt({
-            sub: userDetail._id,
-            type: 'signup',
-          });
+          const userDetail = user;          
           delete userDetail.password;
-          return { ...userDetail, token, role: getInviteData.role };
+          return { ...userDetail};
         }
         throw new HttpException(
           {
@@ -133,7 +121,6 @@ export class AppService {
           },
           HttpStatus.BAD_REQUEST,
         );
-      }
       throw new HttpException(
         {
           status: HttpStatus.BAD_REQUEST,
