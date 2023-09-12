@@ -14,6 +14,7 @@
     "start:prod": "node dist/main",
     "start:docker": "docker compose build && docker compose up",
     "stop:docker": "docker compose down",
+    "deploy": "npm install && npm run build && npm run start:dev",
     "restart:docker": "yarn stop:docker && yarn start:docker",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "jest",
