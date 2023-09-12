@@ -15,10 +15,16 @@ export class User {
   firstname: string;
 
   @Prop({ type: String, required: true })
+  middlename: string;
+
+  @Prop({ type: String, required: true })
   lastname: string;
 
   @Prop({ type: String, required: true, index: true, unique: true })
   email: string;
+
+  @Prop({ type: Boolean, required: true})
+  isHod: boolean;
 
   @Prop({ type: String, required: true, select: false })
   password: string;

@@ -74,10 +74,7 @@ export type SignUpReturnType = Omit<
   SignupUserDatatype,
   'password' | 'invite_id'
 > &
-  ObjectIdType & {
-    token: string;
-    role: Role;
-  };
+  ObjectIdType & SignupUserDatatype;
 
 export interface AssignRoleInterface extends Email {
   role: Role;
@@ -255,8 +252,10 @@ export interface Password {
 export type UserSignupCredential = Password &
   Email & {
     firstname: string;
+    middlename: string;
     lastname: string;
-    role: CreateRoles;
+    isHod: boolean;
+    parastatals: string;
   };
 
 export type SignupSuperUserType = Email &
@@ -267,8 +266,10 @@ export type SignupSuperUserType = Email &
 export type SignupUserDatatype = Password &
   Email & {
     firstname: string;
+    middlename: string;
     lastname: string;
-    invite_id: Schema.Types.ObjectId;
+    isHod: boolean;
+    parastatals: string;
   };
 
 export interface TransportOptions {

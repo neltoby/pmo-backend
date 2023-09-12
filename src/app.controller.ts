@@ -122,15 +122,14 @@ export class AppController {
     return this.appService.verifyInvite(data);
   }
 
-  @UseGuards(AuthSignupGuard)
+  //@UseGuards(AuthSignupGuard)
   @Post('signup')
   signupUser(
     @Body() data: SignupDto,
     @Request() req,
   ): Promise<SignUpReturnType> {
     return this.appService.signupUser({
-      ...data,
-      invite_id: (req.user as InviteTokenPayloadType).invite_id,
+      ...data
     });
   }
 

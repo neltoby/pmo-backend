@@ -25,11 +25,6 @@ import { ProjectsModule } from './projects/projects.module';
     }),
     MongooseModule.forRootAsync({
       useFactory: (config: ConfigService) => {
-        console.log(
-          `${config.get('mongoUrl')}?authSource=admin&directConnection=true`,
-          'line 31',
-        );
-        console.log(`${config.get('jwtSecret')}`, 'line 33');
         return {
           uri: `${config.get('mongoUrl')}`,
         };
