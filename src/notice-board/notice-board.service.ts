@@ -274,7 +274,7 @@ export class NoticeBoardService {
         );
       }
     }
-    return { ...notice };
+    return notice;
   }
 
   update(id: number, updateNoticeBoardDto: UpdateNoticeBoardDto) {
