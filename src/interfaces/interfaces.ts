@@ -4,10 +4,46 @@ import { Schema } from 'mongoose';
 export enum Role {
   Staff = 'staff',
   Admin = 'admin',
-  ParastatalsHeads = 'parastatals',
-  DepartmentHeads = 'department',
-  SuperAdmin = 'superadmin',
+  ParastatalsHeads = 'hop',
+  DepartmentHeads = 'hod',
+  SuperAdmin = 'sadmin',
 }
+
+export enum NoticeMessageBy {
+  PLATFORM = 'platform',
+  EMAIL = 'email',
+}
+
+export enum NoticeMessageTo {
+  HEADS = 'heads-of-parastatal',
+  PMO_STAFF = 'pmo-staffs',
+  PARASTATAL = 'parastatal',
+  INDIVIDUAL = 'individual',
+}
+
+export type SendEmailNotice = {
+  message: string;
+  title: string;
+  email: string;
+  senderEmail: string;
+};
+
+export type SendHeadsEmailNotice = {
+  message: string;
+  title: string;
+  senderEmail: string;
+  parastatal: Schema.Types.ObjectId[];
+};
+
+export type NoticeDataType = {
+  admin_id: Schema.Types.ObjectId;
+  message: string;
+  title: string;
+  by: NoticeMessageBy;
+  to: NoticeMessageTo;
+  to_user?: string;
+  to_parastatal?: Schema.Types.ObjectId[];
+};
 
 export enum Verified {
   Verified = 'verified',
@@ -29,6 +65,24 @@ export enum InviteStatus {
   Fulfilled = 'fulfilled',
 }
 
+export type GetUserStatuType = {
+  adminId: Schema.Types.ObjectId;
+  parastatal: Schema.Types.ObjectId;
+  department?: string;
+};
+
+export type VerifyUserReturnType = {
+  status: Verified;
+  status_by: Schema.Types.ObjectId;
+  status_for: Schema.Types.ObjectId;
+};
+
+export type VerifyUserType = {
+  userId: Schema.Types.ObjectId;
+  status: Verified;
+  adminId: Schema.Types.ObjectId;
+};
+
 export type Name = {
   name: string;
 };
@@ -47,6 +101,11 @@ export type ParastatalsSeedAdjusted = {
   theme: Name;
   data: Name[];
   departments?: Name[];
+};
+
+export type TimestampType = {
+  createdAt?: Date;
+  updatedAt?: Date;
 };
 
 export type Email = {
@@ -70,11 +129,11 @@ export type ForgotPasswordType = Email & {
 
 export type SigninType = Password & Email;
 
-export type SignUpReturnType = Omit<
-  SignupUserDatatype,
-  'password' | 'invite_id'
-> &
-  ObjectIdType & SignupUserDatatype;
+export type SignUpReturnType = JwtTokenInterface & {
+  role: Role;
+  parastatal: Schema.Types.ObjectId;
+  department: string;
+};
 
 export interface AssignRoleInterface extends Email {
   role: Role;
@@ -120,6 +179,11 @@ export type AssignedRoleType = TokenPayloadInterface & AssignRoleInterface;
 export type ForgotPasswordTokenType = {
   id: Schema.Types.ObjectId;
   type: 'forgotpassword';
+};
+
+export type SigninTokenPayloadType = {
+  sub: Schema.Types.ObjectId;
+  type: 'signin';
 };
 
 export type InviteTokenPayloadType = {
@@ -252,10 +316,10 @@ export interface Password {
 export type UserSignupCredential = Password &
   Email & {
     firstname: string;
-    middlename: string;
+    middlename?: string;
     lastname: string;
-    isHod: boolean;
-    parastatals: string;
+    is_hod: boolean;
+    parastatal: Schema.Types.ObjectId;
   };
 
 export type SignupSuperUserType = Email &
@@ -266,10 +330,11 @@ export type SignupSuperUserType = Email &
 export type SignupUserDatatype = Password &
   Email & {
     firstname: string;
-    middlename: string;
+    middlename?: string;
     lastname: string;
-    isHod: boolean;
-    parastatals: string;
+    is_hod: boolean;
+    parastatal: Schema.Types.ObjectId;
+    // department?: string;
   };
 
 export interface TransportOptions {

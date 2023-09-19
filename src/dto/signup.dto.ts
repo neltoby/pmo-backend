@@ -1,4 +1,5 @@
 import { IsNotEmpty, IsEmail, IsString, IsOptional } from 'class-validator';
+import { Schema } from 'mongoose';
 
 export class SignupDto {
   @IsEmail()
@@ -11,7 +12,7 @@ export class SignupDto {
 
   @IsString()
   @IsOptional()
-  middlename: string;
+  middlename?: string;
 
   @IsString()
   @IsNotEmpty()
@@ -19,11 +20,11 @@ export class SignupDto {
 
   @IsString()
   @IsNotEmpty()
-  isHod: boolean;
+  is_hod: boolean;
 
   @IsString()
   @IsNotEmpty()
-  parastatals: string;
+  parastatal: Schema.Types.ObjectId;
 
   @IsString()
   @IsNotEmpty()

@@ -1,9 +1,10 @@
 import {
   HttpException,
   HttpStatus,
+  Inject,
   Injectable,
-  NotFoundException,
   UnauthorizedException,
+  forwardRef,
 } from '@nestjs/common';
 import {
   AssignRoleReturnType,
@@ -13,15 +14,20 @@ import {
   Email,
   ForgotPasswordReturnType,
   ForgotPasswordStatus,
+  GetUserStatuType,
   InviteUserDataType,
   InviteUserType,
   JwtTokenInterface,
   PasswordResetType,
   Role,
   SignUpReturnType,
+  SigninTokenPayloadType,
   SigninType,
   SignupUserDatatype,
   UserDetails,
+  Verified,
+  VerifyUserReturnType,
+  VerifyUserType,
 } from './interfaces/interfaces';
 import { AssignedRole } from '@model/assigned-role/schema/assigned-roles.schema.js';
 import { User } from '@model/user/schema/user.schema.js';
@@ -76,8 +82,10 @@ export class AppService {
   async getUser(id: Schema.Types.ObjectId): Promise<UserDetails> {
     let user;
     try {
-      console.log(id, 'line 79');
-      user = (await this.usermodelService.findOne({ _id: id })) as any;
+      user = (await this.usermodelService.findOne(
+        { _id: id },
+        { select: { password: 0, token: 0, email: 0, is_hod: 0 } },
+      )) as any;
     } catch (e) {
       this.logger.error(e.message);
       throw new HttpException(
@@ -89,45 +97,36 @@ export class AppService {
       );
     }
     // const doc = user._doc as UserDetails;
-    console.log(user, 'line 92');
-    return { ...user };
+    console.log(user._doc, 'line 92');
+    return { ...user._doc };
+  }
+
+  async getUserStatus(query: GetUserStatuType) {
+    const { adminId, parastatal, department = null } = query;
+    // const user = await this.usermodelService.findOne({ _id: adminId })
+    const buildQuery = department
+      ? { parastatals: parastatal, department, verified: Verified.Unverified }
+      : { parastatals: parastatal, verified: Verified.Unverified };
+    const users = this.usermodelService.findAll(buildQuery, {
+      select: '_id fullname verified parastatals department',
+    });
+    return { ...users };
   }
 
   async signupUser(data: SignupUserDatatype): Promise<SignUpReturnType> {
+    const {
+      email,
+      password,
+      firstname,
+      middlename,
+      lastname,
+      is_hod,
+      parastatal,
+    } = data;
+    let hashPassword;
     try {
-      const { email, password, firstname, middlename, lastname, isHod, parastatals} = data;
-      const hashPassword = await this.hashService.hashing(password);
-
-        if (!(await this.isEmailExist(email))) {
-
-          //Get parastatals from db
-          const user = await this.usermodelService.create({
-            email,
-            firstname,
-            middlename,
-            lastname,
-            password: hashPassword,
-            isHod,
-            parastatals
-          });
-          const userDetail = user;          
-          delete userDetail.password;
-          return { ...userDetail};
-        }
-        throw new HttpException(
-          {
-            status: HttpStatus.BAD_REQUEST,
-            error: 'Email already exist.',
-          },
-          HttpStatus.BAD_REQUEST,
-        );
-      throw new HttpException(
-        {
-          status: HttpStatus.BAD_REQUEST,
-          error: 'Unrecognized email address',
-        },
-        HttpStatus.BAD_REQUEST,
-      );
+      hashPassword = await this.hashService.hashing(password);
+      this.logger.log('Password hashed succesfully.');
     } catch (e) {
       this.logger.error(e.message);
       throw new HttpException(
@@ -138,6 +137,41 @@ export class AppService {
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
+    if (!(await this.isEmailExist(email))) {
+      //Get parastatals from db
+      try {
+        const user = await this.usermodelService.create({
+          email,
+          firstname,
+          middlename,
+          lastname,
+          password: hashPassword,
+          is_hod,
+          parastatal,
+        });
+        const userDetail: any = (user as any)._doc;
+        delete userDetail.password;
+        delete userDetail.token;
+        return { ...userDetail, parastatal: userDetail.parastatal._id };
+      } catch (e) {
+        this.logger.error(e.message);
+        throw new HttpException(
+          {
+            status: HttpStatus.INTERNAL_SERVER_ERROR,
+            error: APP_ERROR,
+          },
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
+    }
+    this.logger.error(`${email} :::  Email already exists.`);
+    throw new HttpException(
+      {
+        status: HttpStatus.BAD_REQUEST,
+        error: 'Email already exist.',
+      },
+      HttpStatus.BAD_REQUEST,
+    );
   }
 
   async signinUser(data: SigninType): Promise<SignUpReturnType> {
@@ -145,7 +179,6 @@ export class AppService {
     const isEmail = await this.emailExistService(email);
     if (isEmail.status) {
       const user = (isEmail.data as any)._doc;
-      console.log(user);
       try {
         await this.hashService.verifyHash(password, user.password);
       } catch (e) {
@@ -158,12 +191,32 @@ export class AppService {
           HttpStatus.NOT_FOUND,
         );
       }
+      if (user.verified === Verified.Unverified) {
+        throw new HttpException(
+          {
+            status: HttpStatus.UNAUTHORIZED,
+            error:
+              'Your credentials have not been verified. Please contact your admin.',
+          },
+          HttpStatus.UNAUTHORIZED,
+        );
+      }
       let token;
       try {
         token = await this.jwtService.signJwt({
           sub: user._id,
           type: 'signin',
         });
+        this.logger.log('Token was created successfully.');
+        await this.usermodelService.findOneAndUpdate(
+          { _id: user._id },
+          { $push: { token } },
+          {
+            upsert: true,
+            new: true,
+          },
+        );
+        this.logger.log('Token was added to the database successfully.');
       } catch (e) {
         this.logger.error(e.message);
         throw new HttpException(
@@ -174,11 +227,11 @@ export class AppService {
           HttpStatus.INTERNAL_SERVER_ERROR,
         );
       }
-      delete user.password;
       return {
-        ...user,
         token,
-        role: user.role.role,
+        role: user.role,
+        parastatal: user.parastatal,
+        department: user.department,
       };
     }
     throw new HttpException(
@@ -188,6 +241,32 @@ export class AppService {
       },
       HttpStatus.NOT_FOUND,
     );
+  }
+
+  async verifyUsers(data: VerifyUserType): Promise<VerifyUserReturnType> {
+    const { userId, status, adminId } = data;
+    try {
+      await this.usermodelService.findOneAndUpdate(
+        { _id: userId },
+        { verified: status, verified_by: adminId },
+      );
+      this.logger.log(
+        `Admin with id ${adminId} updated verified status of user with id ${userId} to ${status}`,
+      );
+      return {
+        status,
+        status_by: adminId,
+        status_for: userId,
+      };
+    } catch (err) {
+      throw new HttpException(
+        {
+          status: HttpStatus.INTERNAL_SERVER_ERROR,
+          error: APP_ERROR,
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
   async forgotPassword(email): Promise<ForgotPasswordReturnType> {
@@ -313,14 +392,14 @@ export class AppService {
     }
     const assignerData = assignerRes;
     const assigneeData = assigneeRes;
-    if (assignerData.role.role !== Role.Admin) {
-      if (assignerData.role.role === Role.ParastatalsHeads) {
-        if (assignerData.parastatals === assigneeData.parastatals) {
+    if (assignerData.role !== Role.Admin) {
+      if (assignerData.role === Role.ParastatalsHeads) {
+        if (assignerData.parastatal === assigneeData.parastatal) {
           return true;
         }
         return false;
       }
-      if (assignerData.role.role === Role.DepartmentHeads) {
+      if (assignerData.role === Role.DepartmentHeads) {
         if (assignerData.department === assigneeData.department) {
           return true;
         }
@@ -525,5 +604,33 @@ export class AppService {
       { status: HttpStatus.BAD_REQUEST, error: 'Incorrect password.' },
       HttpStatus.BAD_REQUEST,
     );
+  }
+
+  async logout(token: string) {
+    let payload: SigninTokenPayloadType;
+    try {
+      payload = await this.jwtService.verifyJwt(token);
+    } catch (e) {
+      this.logger.error(e.message);
+      throw new HttpException(
+        { status: HttpStatus.INTERNAL_SERVER_ERROR, error: APP_ERROR },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+    if (payload.sub) {
+      try {
+        const user = await this.usermodelService.findOneAndUpdate(
+          { _id: payload.sub },
+          { $pull: { token } },
+        );
+        return { id: user._id, token };
+      } catch (e) {
+        this.logger.error(e.message);
+        throw new HttpException(
+          { status: HttpStatus.INTERNAL_SERVER_ERROR, error: APP_ERROR },
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
+    }
   }
 }

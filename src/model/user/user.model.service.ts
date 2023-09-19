@@ -23,6 +23,20 @@ export class UserModelService {
     return await query.exec();
   }
 
+  async findAll(
+    condition: Record<string, any>,
+    projection?: {
+      select?:
+        | string
+        | Array<string>
+        | Record<string, number | boolean | object>;
+    },
+  ): Promise<User[]> {
+    let query = this.userModel.find(condition);
+    query = projection?.select ? query.select(projection.select) : query;
+    return await query.exec();
+  }
+
   async create(user: UserSignupCredential): Promise<User> {
     const createdUser = new this.userModel(user);
     return await createdUser.save();

@@ -15,11 +15,12 @@ import {
   AssignRoleReturnType,
   Email,
   ForgotPasswordReturnType,
-  InviteTokenPayloadType,
   Role,
   SignUpReturnType,
+  SigninTokenPayloadType,
   TokenPayloadInterface,
   UserDetails,
+  VerifyUserReturnType,
 } from '@interfaces/interfaces';
 import { AuthGuard } from './auth/auth.guard';
 import { Roles } from './auth/roles.decorator';
@@ -34,19 +35,36 @@ import { AuthSignupGuard } from './auth/auth-signup.guard';
 import { ForgotPasswordGuard } from './auth/forgotpassword.guard';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { InviteUser } from '@model/invite-user/schema/inviteuser.schema';
+import { VerifyUserDto } from './dto/verify-user.dto';
+import { UserStatusDto } from './dto/user-status.dto';
 
 @Controller('users')
 export class AppController {
   constructor(private readonly appService: AppService) {}
 
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthSignupGuard)
   @Get()
   getUser(@Request() req): Promise<UserDetails> {
-    console.log(req.user, 'line 45');
     return this.appService.getUser((req.user as TokenPayloadInterface).sub);
   }
 
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthSignupGuard)
+  @Roles(
+    Role.SuperAdmin,
+    Role.Admin,
+    Role.ParastatalsHeads,
+    Role.DepartmentHeads,
+  )
+  @UseGuards(RolesGuard)
+  @Get('status')
+  getUserStatus(@Query() data: UserStatusDto, @Request() req) {
+    return this.appService.getUserStatus({
+      ...data,
+      adminId: (req.user as SigninTokenPayloadType).sub,
+    });
+  }
+
+  @UseGuards(AuthSignupGuard)
   @Roles(
     Role.SuperAdmin,
     Role.Admin,
@@ -122,14 +140,13 @@ export class AppController {
     return this.appService.verifyInvite(data);
   }
 
-  //@UseGuards(AuthSignupGuard)
   @Post('signup')
   signupUser(
     @Body() data: SignupDto,
     @Request() req,
   ): Promise<SignUpReturnType> {
     return this.appService.signupUser({
-      ...data
+      ...data,
     });
   }
 
@@ -143,6 +160,25 @@ export class AppController {
     @Body() email: ForgotPasswordDto,
   ): Promise<ForgotPasswordReturnType> {
     return this.appService.forgotPassword(email);
+  }
+
+  @UseGuards(AuthSignupGuard)
+  @Roles(
+    Role.SuperAdmin,
+    Role.Admin,
+    Role.ParastatalsHeads,
+    Role.DepartmentHeads,
+  )
+  @UseGuards(RolesGuard)
+  @Post('verify-users')
+  verifyUsers(
+    @Body() userData: VerifyUserDto,
+    @Request() req,
+  ): Promise<VerifyUserReturnType> {
+    return this.appService.verifyUsers({
+      ...userData,
+      adminId: (req.user as SigninTokenPayloadType).sub,
+    });
   }
 
   @UseGuards(ForgotPasswordGuard)
@@ -159,5 +195,10 @@ export class AppController {
   @Post('password-reset')
   passwordReset(@Body() data: ResetPasswordDto): Promise<AssignRoleReturnType> {
     return this.appService.passwordReset(data);
+  }
+
+  @Delete('logout/:token')
+  logout(@Param('token') token: string) {
+    return this.appService.logout(token);
   }
 }

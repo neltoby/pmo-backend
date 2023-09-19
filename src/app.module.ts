@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -15,6 +15,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { BullModule } from '@nestjs/bull';
 import { ParastatalsModule } from './parastatals/parastatals.module';
 import { ProjectsModule } from './projects/projects.module';
+import { NoticeBoardModule } from './notice-board/notice-board.module';
 
 @Module({
   imports: [
@@ -53,8 +54,10 @@ import { ProjectsModule } from './projects/projects.module';
     NotificationQueueModule,
     ParastatalsModule,
     ProjectsModule,
+    forwardRef(() => NoticeBoardModule),
   ],
   controllers: [AppController],
   providers: [AppService],
+  exports: [AppService],
 })
 export class AppModule {}

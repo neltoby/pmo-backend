@@ -43,9 +43,14 @@ export class ParastatalsCategoryModelService {
 
   async findAll(projection?: {
     select?: string | Array<string> | Record<string, number | boolean | object>;
+    sort?: Record<string, any>;
   }): Promise<ParastatalsCategory[]> {
     let query = this.parastatalsCategoryModel.find({});
-    query = projection?.select ? query.select(projection.select) : query;
+    query = projection?.select
+      ? query.select(projection.select)
+      : projection?.sort
+      ? query.sort(projection.sort)
+      : query;
     return await query.exec();
   }
 

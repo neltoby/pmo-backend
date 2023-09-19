@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   Param,
+  ParseBoolPipe,
   Post,
   Query,
   Request,
@@ -25,8 +26,8 @@ export class ParastatalsController {
 
   // @UseGuards(AuthGuard)
   @Get()
-  getAllParastatals() {
-    return this.parastatalsService.getAllParastatals();
+  getAllParastatals(@Query('themes', ParseBoolPipe) themes = true) {
+    return this.parastatalsService.getAllParastatals(themes);
   }
 
   // @UseGuards(AuthGuard)

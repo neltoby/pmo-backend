@@ -4,8 +4,6 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
 
 import {
@@ -14,12 +12,12 @@ import {
 } from '@interfaces/interfaces';
 import { ForgotPasswordModelService } from '@model/forgot-password/forgot-password.model.service';
 import { MyLoggerService } from '@mylogger/mylogger.service';
+import { JwtAuthService } from '@jwt-auth/jwt-auth.service';
 
 @Injectable()
 export class ForgotPasswordGuard implements CanActivate {
   constructor(
-    private jwtService: JwtService,
-    private configService: ConfigService,
+    private jwtService: JwtAuthService,
     private logger: MyLoggerService,
     private forgotPasswordService: ForgotPasswordModelService,
   ) {}
@@ -31,10 +29,9 @@ export class ForgotPasswordGuard implements CanActivate {
       throw new UnauthorizedException();
     }
     try {
-      const payload: ForgotPasswordTokenType =
-        await this.jwtService.verifyAsync(token, {
-          secret: this.configService.get('jwtSecret'),
-        });
+      const payload: ForgotPasswordTokenType = await this.jwtService.verifyJwt(
+        token,
+      );
       if (payload.type === 'forgotpassword') {
         const forgotPassword = await this.forgotPasswordService.findOne({
           _id: payload.id,

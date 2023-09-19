@@ -53,9 +53,14 @@ export class ParastatalsModelService implements OnModuleInit {
 
   async findAll(projection?: {
     select?: string | Array<string> | Record<string, number | boolean | object>;
+    sort?: Record<string, any>;
   }): Promise<Parastatals[]> {
     let query = this.parastatalsModel.find({});
-    query = projection?.select ? query.select(projection.select) : query;
+    query = projection?.select
+      ? query.select(projection.select)
+      : projection?.sort
+      ? query.sort(projection.sort)
+      : query;
     return await query.exec();
   }
 

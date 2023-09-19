@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Schema as MongooseSchema } from 'mongoose';
+import { Type } from 'class-transformer';
 
 import { Department } from './department.schema';
 import { ParastatalsCategory } from '@model/parastatals-category/schema/parastatals-category.schema';
@@ -15,6 +16,7 @@ export class Parastatals {
     required: true,
     ref: 'ParastatalsCategory',
   })
+  @Type(() => ParastatalsCategory)
   category: ParastatalsCategory;
 
   @Prop({ type: String, required: true, unique: true, index: true })

@@ -7,6 +7,7 @@ import {
   CREATE_USER_EMAIL_JOB,
   ASSIGN_ROLE_MAIL_JOB,
   INVITE_USER_JOB,
+  NOTIFY_USER_JOB,
 } from '../constants';
 import { MyLoggerService } from '@mylogger/mylogger.service';
 
@@ -53,5 +54,12 @@ export class NotificationQueueService {
       `Queuing email to be sent ${email} -- invite user to platform mail`,
     );
     await this.createQueue(INVITE_USER_JOB, email);
+  }
+
+  async sendNoticeMail(email: EmailOptions) {
+    this.logger.log(
+      `Queuing email to be sent ${email} --  notify users with mail`,
+    );
+    await this.createQueue(NOTIFY_USER_JOB, email);
   }
 }

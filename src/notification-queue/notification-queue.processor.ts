@@ -13,6 +13,7 @@ import {
   CREATE_USER_EMAIL_JOB,
   ASSIGN_ROLE_MAIL_JOB,
   INVITE_USER_JOB,
+  NOTIFY_USER_JOB,
 } from '../constants';
 import { EmailService } from '@email/email.service';
 import { MyLoggerService } from '@mylogger/mylogger.service';
@@ -36,6 +37,11 @@ export class NotificationQueueConsumerProcessor {
 
   @Process(INVITE_USER_JOB)
   async inviteUser(job: Job) {
+    await this.emailService.sendEmailJobs(job);
+  }
+
+  @Process(NOTIFY_USER_JOB)
+  async notifyUser(job: Job) {
     await this.emailService.sendEmailJobs(job);
   }
 

@@ -4,19 +4,18 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
 
-import { InviteTokenPayloadType } from '@interfaces/interfaces';
-import { InviteUserModelService } from '@model/invite-user/inviteuser.model.service';
+import { SigninTokenPayloadType } from '@interfaces/interfaces';
+import { UserModelService } from '@model/user/user.model.service';
+import { JwtAuthService } from '@jwt-auth/jwt-auth.service';
 
 @Injectable()
 export class AuthSignupGuard implements CanActivate {
   constructor(
-    private jwtService: JwtService,
-    private configService: ConfigService,
-    private inviteuserService: InviteUserModelService,
+    private jwtService: JwtAuthService,
+    // private inviteuserService: InviteUserModelService,
+    private userModelService: UserModelService,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -26,18 +25,17 @@ export class AuthSignupGuard implements CanActivate {
       throw new UnauthorizedException();
     }
     try {
-      const payload: InviteTokenPayloadType = await this.jwtService.verifyAsync(
+      const payload: SigninTokenPayloadType = await this.jwtService.verifyJwt(
         token,
-        {
-          secret: this.configService.get('jwtSecret'),
-        },
       );
-      if (payload.type === 'invite') {
-        const invite = await this.inviteuserService.findOne({
-          _id: payload.invite_id,
+      if (payload.type === 'signin') {
+        const user = await this.userModelService.findOne({
+          _id: payload.sub,
+          token,
         });
-        if (invite) {
-          request['user'] = payload;
+        if (user) {
+          console.log(user, 'line 37');
+          request['user'] = { ...payload, role: user.role };
           return true;
         }
         throw new UnauthorizedException();

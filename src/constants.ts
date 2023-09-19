@@ -5,6 +5,7 @@ export const NOTIFICATION_QUEUE = 'NOTIFICATION_QUEUE';
 export const CREATE_USER_EMAIL_JOB = 'CREATE_USER_EMAIL_JOB';
 export const ASSIGN_ROLE_MAIL_JOB = 'ASSIGN_ROLE_MAIL_JOB';
 export const INVITE_USER_JOB = 'INVITE_USER_JOB';
+export const NOTIFY_USER_JOB = 'NOTIFY_USER_JOB';
 export const WINSTON = 'winston';
 export const ROLES_KEY = 'roles';
 export const APP_ERROR = 'Application server error';

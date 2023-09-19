@@ -1,13 +1,19 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Schema as MongooseSchema } from 'mongoose';
+import { Type } from 'class-transformer';
 
-import { Roles } from '@model/roles/schema/roles.schema';
+import { Role } from '@interfaces/interfaces';
 import { Parastatals } from '@model/parastatals/schema/parastatals.schema';
-import { Department } from '@model/parastatals/schema/department.schema';
+import { Verified } from '@interfaces/interfaces';
 
 export type UserDocument = HydratedDocument<User>;
 
-@Schema()
+@Schema({
+  timestamps: true,
+  toJSON: {
+    getters: true,
+  },
+})
 export class User {
   _id: MongooseSchema.Types.ObjectId;
 
@@ -23,23 +29,44 @@ export class User {
   @Prop({ type: String, required: true, index: true, unique: true })
   email: string;
 
-  @Prop({ type: Boolean, required: true})
-  isHod: boolean;
+  @Prop({ type: Boolean, required: true })
+  is_hod: boolean;
 
-  @Prop({ type: String, required: true, select: false })
+  @Prop({ type: String, required: true })
   password: string;
 
-  @Prop({ type: MongooseSchema.Types.ObjectId, required: true, ref: 'Roles' })
-  role: Roles;
+  @Prop({ type: String })
+  profile_image: string;
+
+  @Prop({ type: String, enum: Role, default: Role.Staff })
+  role: Role;
 
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Parastatals' })
-  parastatals: Parastatals;
+  @Type(() => User)
+  parastatal: Parastatals;
 
-  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Department' })
-  department: Department;
+  @Prop({ type: String })
+  department?: string;
 
-  @Prop({ type: Date, default: new Date() })
-  date: Date;
+  @Prop({ type: String, enum: [Verified], default: Verified.Unverified })
+  verified: Verified;
+
+  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'User' })
+  verified_by: MongooseSchema.Types.ObjectId;
+
+  @Prop({ type: [String] })
+  token: string[];
+
+  @Prop()
+  createdAt?: Date;
+
+  @Prop()
+  updatedAt?: Date;
+
+  fullname: string;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
+UserSchema.virtual('fullName').get(function (this: UserDocument) {
+  return `${this.firstname} ${this.middlename} ${this.lastname}`.trim();
+});
