@@ -160,42 +160,57 @@ export class NoticeBoardService {
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
-    console.log(user.parastatal);
+    console.log(user.parastatal, 'line 163');
     let notice;
     if (user.role === Role.ParastatalsHeads) {
       try {
         notice = await this.noticeBoardModelService.rawModel().aggregate([
           {
             $match: {
-              $all: [
-                { to: NoticeMessageTo.HEADS },
-                { to: NoticeMessageTo.PARASTATAL },
-                { to_parastatal: user.parastatal },
+              $and: [
+                {
+                  $or: [
+                    { to: NoticeMessageTo.HEADS },
+                    { to: NoticeMessageTo.PARASTATAL },
+                  ],
+                },
+                {
+                  to_parastatal: user.parastatal,
+                },
               ],
             },
           },
           {
             $lookup: {
               from: 'users',
-              localField: 'to_parasatatal',
-              let: { userId: '$users._id' },
-              pipeline: [
-                {
-                  $match: { $expr: { $eq: ['$userId', user._id] } },
-                },
-              ],
-              foreignField: 'parastatal',
+              localField: 'admin_id',
+              foreignField: '_id',
               as: 'users',
             },
           },
           {
+            $lookup: {
+              from: 'parastatals',
+              localField: 'to_parastatal',
+              foreignField: '_id',
+              as: 'parastatal',
+            },
+          },
+          {
             $project: {
+              by: 1,
+              message: 1,
+              title: 1,
+              to: 1,
+              to_parastatal: 1,
+              updatedAt: 1,
               'users.firstname': 1,
               'users.lastname': 1,
               'users.middlename': 1,
               'users.fullname': 1,
               'users.profile_image': 1,
               'users._id': 1,
+              'parastatal.name': 1,
             },
           },
         ]);
@@ -211,7 +226,7 @@ export class NoticeBoardService {
         notice = await this.noticeBoardModelService.rawModel().aggregate([
           {
             $match: {
-              $all: [
+              $and: [
                 { to: NoticeMessageTo.PARASTATAL },
                 { to_parastatal: user.parastatal },
               ],
@@ -220,25 +235,34 @@ export class NoticeBoardService {
           {
             $lookup: {
               from: 'users',
-              localField: 'to_parasatatal',
-              let: { userId: '$users._id' },
-              pipeline: [
-                {
-                  $match: { $expr: { $eq: ['$userId', user._id] } },
-                },
-              ],
-              foreignField: 'parastatal',
+              localField: 'admin_id',
+              foreignField: '_id',
               as: 'users',
             },
           },
           {
+            $lookup: {
+              from: 'parastatals',
+              localField: 'to_parastatal',
+              foreignField: '_id',
+              as: 'parastatal',
+            },
+          },
+          {
             $project: {
+              by: 1,
+              message: 1,
+              title: 1,
+              to: 1,
+              to_parastatal: 1,
+              updatedAt: 1,
               'users.firstname': 1,
               'users.lastname': 1,
               'users.middlename': 1,
               'users.fullname': 1,
               'users.profile_image': 1,
               'users._id': 1,
+              'parastatal.name': 1,
             },
           },
         ]);
