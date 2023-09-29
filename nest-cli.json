@@ -4,7 +4,7 @@
   "sourceRoot": "src",
   "compilerOptions": {
     "deleteOutDir": true,
-    "assets": ["assets/**/*.ejs"],
+    "assets": ["assets/**/*.ejs", "files/**/*"],
     "watchAssets": true,
     "plugins": [
       {

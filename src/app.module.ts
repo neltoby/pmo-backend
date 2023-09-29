@@ -16,6 +16,8 @@ import { BullModule } from '@nestjs/bull';
 import { ParastatalsModule } from './parastatals/parastatals.module';
 import { ProjectsModule } from './projects/projects.module';
 import { NoticeBoardModule } from './notice-board/notice-board.module';
+import { ChatModule } from './chat/chat.module';
+import { UploadModule } from './upload/upload.module';
 
 @Module({
   imports: [
@@ -52,9 +54,11 @@ import { NoticeBoardModule } from './notice-board/notice-board.module';
     JwtAuthModule,
     HashModule,
     NotificationQueueModule,
-    ParastatalsModule,
+    forwardRef(() => ParastatalsModule),
     ProjectsModule,
     forwardRef(() => NoticeBoardModule),
+    ChatModule,
+    UploadModule,
   ],
   controllers: [AppController],
   providers: [AppService],

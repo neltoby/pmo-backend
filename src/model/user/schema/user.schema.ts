@@ -17,16 +17,21 @@ export type UserDocument = HydratedDocument<User>;
 export class User {
   _id: MongooseSchema.Types.ObjectId;
 
-  @Prop({ type: String, required: true })
+  @Prop({ type: String, required: [true, 'First name can not be empty.'] })
   firstname: string;
 
   @Prop({ type: String, required: true })
   middlename: string;
 
-  @Prop({ type: String, required: true })
+  @Prop({ type: String, required: [true, 'Last name can not empty.'] })
   lastname: string;
 
-  @Prop({ type: String, required: true, index: true, unique: true })
+  @Prop({
+    type: String,
+    required: [true, 'Email can not be empty.'],
+    index: true,
+    unique: true,
+  })
   email: string;
 
   @Prop({ type: Boolean, required: true })
@@ -48,6 +53,9 @@ export class User {
   @Prop({ type: String })
   department?: string;
 
+  @Prop({ type: String, unique: [true, 'Phone number already exist.'] })
+  phoneno: string;
+
   @Prop({ type: String, enum: [Verified], default: Verified.Unverified })
   verified: Verified;
 
@@ -56,6 +64,9 @@ export class User {
 
   @Prop({ type: [String] })
   token: string[];
+
+  @Prop({ type: Date })
+  birthdate: Date;
 
   @Prop()
   createdAt?: Date;

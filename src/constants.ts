@@ -10,3 +10,4 @@ export const WINSTON = 'winston';
 export const ROLES_KEY = 'roles';
 export const APP_ERROR = 'Application server error';
 export const NO_RESOURCE = 'No resource found.';
+export const SERVICE_CONFIG = 'Service-config';

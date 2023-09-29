@@ -10,6 +10,9 @@ export default () => ({
   mailtrapPort: process.env.MAILTRAP_PORT,
   mailtrapAuthUser: process.env.MAILTRAP_AUTH_USER,
   mailtrapAuthPass: process.env.MAILTRAP_AUTH_PASS,
+  cloudName: process.env.UPLOAD_CLOUD_NAME,
+  apiKey: process.env.UPLOAD_API_KEY,
+  apiSecret: process.env.UPLOAD_SECRET_KEY,
   // database: {
   //   host: process.env.DATABASE_HOST,
   //   port: parseInt(process.env.DATABASE_PORT, 10) || 5432,

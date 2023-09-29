@@ -12,6 +12,7 @@ import {
   AssignedRoleType,
   DeleteInviteType,
   Email,
+  FileUploadType,
   ForgotPasswordReturnType,
   ForgotPasswordStatus,
   GetUserStatuType,
@@ -43,6 +44,8 @@ import { InviteUser } from '@model/invite-user/schema/inviteuser.schema';
 import { HashService } from '@hash/hash.service';
 import { ForgotPasswordModelService } from '@model/forgot-password/forgot-password.model.service';
 import { Schema } from 'mongoose';
+import { EditUserDto } from './dto/editUser.dto';
+import { UploadService } from './upload/upload.service';
 
 @Injectable()
 export class AppService {
@@ -56,6 +59,7 @@ export class AppService {
     private jwtService: JwtAuthService,
     private notifQueue: NotificationQueueService,
     private hashService: HashService,
+    private uploadService: UploadService,
   ) {}
 
   async emailExistService(
@@ -84,7 +88,15 @@ export class AppService {
     try {
       user = (await this.usermodelService.findOne(
         { _id: id },
-        { select: { password: 0, token: 0, email: 0, is_hod: 0 } },
+        {
+          select: {
+            password: 0,
+            token: 0,
+            is_hod: 0,
+            __v: 0,
+            _id: 0,
+          },
+        },
       )) as any;
     } catch (e) {
       this.logger.error(e.message);
@@ -97,7 +109,6 @@ export class AppService {
       );
     }
     // const doc = user._doc as UserDetails;
-    console.log(user._doc, 'line 92');
     return { ...user._doc };
   }
 
@@ -571,6 +582,28 @@ export class AppService {
     );
   }
 
+  async editUser(user: { _id: Schema.Types.ObjectId } & EditUserDto) {
+    const { _id, ...rest } = user;
+    let res;
+    try {
+      res = await this.usermodelService.findOneAndUpdate(
+        { _id },
+        { ...rest },
+        {
+          upsert: true,
+          new: true,
+        },
+      );
+    } catch (e) {
+      this.logger.error(e.message);
+      throw new HttpException(
+        { status: HttpStatus.INTERNAL_SERVER_ERROR, error: APP_ERROR },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+    return { status: 'success' };
+  }
+
   async passwordReset(data: PasswordResetType): Promise<AssignRoleReturnType> {
     const { password, confirm_password, id } = data;
     if (password === confirm_password) {
@@ -631,6 +664,31 @@ export class AppService {
           HttpStatus.INTERNAL_SERVER_ERROR,
         );
       }
+    }
+  }
+
+  async fileUpload({ file, _id }: FileUploadType) {
+    const { secure_url } = await this.uploadService.upload(file);
+    try {
+      const response = await this.usermodelService.findOneAndUpdate(
+        { _id },
+        { profile_image: secure_url },
+        {
+          upsert: true,
+          new: true,
+        },
+      );
+      return {
+        profile_image: response.profile_image,
+        createdAt: response.createdAt,
+        updatedAt: response.updatedAt,
+      };
+    } catch (err) {
+      this.logger.error(err.message);
+      throw new HttpException(
+        { status: HttpStatus.INTERNAL_SERVER_ERROR, error: APP_ERROR },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 }

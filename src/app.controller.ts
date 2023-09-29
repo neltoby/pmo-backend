@@ -4,10 +4,15 @@ import {
   Delete,
   Get,
   Param,
+  Patch,
   Post,
+  Put,
   Query,
   Request,
+  UploadedFile,
+  UploadedFiles,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { AppService } from './app.service';
 import { RoleAssigned } from './dto/role-assigned.dto';
@@ -37,6 +42,11 @@ import { ResetPasswordDto } from './dto/reset-password.dto';
 import { InviteUser } from '@model/invite-user/schema/inviteuser.schema';
 import { VerifyUserDto } from './dto/verify-user.dto';
 import { UserStatusDto } from './dto/user-status.dto';
+import { EditUserDto } from './dto/editUser.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { Express } from 'express';
+import { diskStorage, memoryStorage } from 'multer';
+import { extname, resolve } from 'path';
 
 @Controller('users')
 export class AppController {
@@ -189,6 +199,30 @@ export class AppController {
   ): Promise<AssignRoleReturnType> {
     return this.appService.verifyPasswordToken({
       email: (req.user as Email).email,
+    });
+  }
+
+  @UseGuards(AuthSignupGuard)
+  @Patch()
+  editUser(@Body() user: EditUserDto, @Request() req) {
+    return this.appService.editUser({
+      ...user,
+      _id: (req.user as TokenPayloadInterface).sub,
+    });
+  }
+
+  @UseGuards(AuthSignupGuard)
+  @Post('upload')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: memoryStorage(),
+    }),
+  )
+  fileUpload(@UploadedFile() file: Express.Multer.File, @Request() req) {
+    console.log(file, req.file, req.body, 'line 214');
+    return this.appService.fileUpload({
+      file,
+      _id: (req.user as TokenPayloadInterface).sub,
     });
   }
 

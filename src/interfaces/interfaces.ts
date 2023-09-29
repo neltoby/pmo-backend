@@ -280,7 +280,7 @@ export type UserDetails = {
   lastname: string;
   email: string;
   role: Role;
-  parastatals: Schema.Types.ObjectId;
+  parastatal: Schema.Types.ObjectId;
   department: SchemaDepartmentType;
   date: Date;
 };
@@ -336,6 +336,11 @@ export type SignupUserDatatype = Password &
     parastatal: Schema.Types.ObjectId;
     // department?: string;
   };
+
+export type FileUploadType = {
+  file: Express.Multer.File;
+  _id: Schema.Types.ObjectId;
+};
 
 export interface TransportOptions {
   host: string;

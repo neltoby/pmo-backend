@@ -9,13 +9,14 @@ import { Request } from 'express';
 import { SigninTokenPayloadType } from '@interfaces/interfaces';
 import { UserModelService } from '@model/user/user.model.service';
 import { JwtAuthService } from '@jwt-auth/jwt-auth.service';
+import { MyLoggerService } from '@mylogger/mylogger.service';
 
 @Injectable()
 export class AuthSignupGuard implements CanActivate {
   constructor(
     private jwtService: JwtAuthService,
-    // private inviteuserService: InviteUserModelService,
     private userModelService: UserModelService,
+    private logger: MyLoggerService,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -24,25 +25,34 @@ export class AuthSignupGuard implements CanActivate {
     if (!token) {
       throw new UnauthorizedException();
     }
+    let payload: SigninTokenPayloadType;
     try {
-      const payload: SigninTokenPayloadType = await this.jwtService.verifyJwt(
-        token,
+      payload = await this.jwtService.verifyJwt(token);
+    } catch (e) {
+      const res = await this.userModelService.findOneAndUpdate(
+        { token },
+        { $pull: { token } },
       );
+      console.log(res);
+      this.logger.error(e.message);
+      throw new UnauthorizedException();
+    }
+    let user;
+    try {
       if (payload.type === 'signin') {
-        const user = await this.userModelService.findOne({
+        user = await this.userModelService.findOne({
           _id: payload.sub,
           token,
         });
-        if (user) {
-          console.log(user, 'line 37');
-          request['user'] = { ...payload, role: user.role };
-          return true;
-        }
-        throw new UnauthorizedException();
-      }
-    } catch {
+      } else throw new Error();
+    } catch (e) {
       throw new UnauthorizedException();
     }
+    if (user) {
+      request['user'] = { ...payload, role: user.role };
+      return true;
+    }
+    throw new UnauthorizedException();
   }
 
   private extractTokenFromHeader(request: Request): string | undefined {

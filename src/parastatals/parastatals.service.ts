@@ -8,12 +8,13 @@ import {
 import { ParastatalsModelService } from '@model/parastatals/parastatals.model.service';
 import { MyLoggerService } from '@mylogger/mylogger.service';
 import { APP_ERROR } from 'src/constants';
-import { parastatalsWithThemes } from '@model/parastatals/seeds';
 import { ParastatalsCategoryModelService } from '@model/parastatals-category/parastatals-category.model.service';
+import { AppService } from 'src/app.service';
 
 @Injectable()
 export class ParastatalsService {
   constructor(
+    private appService: AppService,
     private parastatalsModelService: ParastatalsModelService,
     private parastatalsCategoryModelService: ParastatalsCategoryModelService,
     private logger: MyLoggerService,
@@ -70,7 +71,6 @@ export class ParastatalsService {
   async getParastatals(_id: Schema.Types.ObjectId) {
     let res;
     try {
-      console.log(_id, 'line 58');
       res = await this.parastatalsModelService.findOne(
         { _id },
         {
@@ -84,7 +84,8 @@ export class ParastatalsService {
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
-    return { ...res._doc };
+    if (res) return { ...res._doc };
+    return {};
   }
 
   async addParastatals(data: ParastatalsType) {
@@ -137,7 +138,6 @@ export class ParastatalsService {
   }
 
   async addDepartment({ name, pid }: AddDepartmentType) {
-    console.log(name, pid, 'line 125');
     let res;
     try {
       res = await this.parastatalsModelService.findOneAndUpdate(
@@ -152,5 +152,14 @@ export class ParastatalsService {
       );
     }
     return { ...res._doc };
+  }
+
+  async getDefaultDepartment(id: Schema.Types.ObjectId) {
+    console.log('i was called with: ', id);
+    const user = await this.appService.getUser(id);
+    console.log(user, user.parastatal, 'line 161');
+    const dept = await this.getParastatals(user.parastatal);
+    console.log(dept, 'line 163');
+    return dept;
   }
 }

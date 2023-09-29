@@ -15,4 +15,7 @@ export const validationSchema = (port: number) =>
     MAILTRAP_PORT: Joi.number().default(2525),
     MAILTRAP_AUTH_USER: Joi.string(),
     MAILTRAP_AUTH_PASS: Joi.string(),
+    UPLOAD_CLOUD_NAME: Joi.string(),
+    UPLOAD_API_KEY: Joi.string(),
+    UPLOAD_SECRET_KEY: Joi.string(),
   });
