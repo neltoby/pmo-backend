@@ -6,7 +6,6 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
-    "preinstall": " npm cache clean --force",
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
@@ -15,7 +14,7 @@
     "start:prod": "node dist/main",
     "start:docker": "docker compose build && docker compose up",
     "stop:docker": "docker compose down",
-    "deploy": "npm install && npm run build && node dist/main",
+    "deploy": "yarn build && node dist/main",
     "restart:docker": "yarn stop:docker && yarn start:docker",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "jest",
